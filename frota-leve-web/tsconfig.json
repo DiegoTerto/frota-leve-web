@@ -1,6 +1,10 @@
 {
   "compilerOptions": {
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -18,15 +22,23 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
-    }
+      "@/*": [
+        "./src/*"
+      ]
+    },
+    "target": "ES2017"
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/app/home/page.tsx"
-, "src/components/Formulario.tsx", "src/components/Login.jsx", "src/components/VeicleList.jsx"  ],
-  "exclude": ["node_modules"]
+    "src/app/home/page.tsx",
+    "src/components/Formulario.tsx",
+    "src/components/Login.jsx",
+    "src/components/VeicleList.jsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
