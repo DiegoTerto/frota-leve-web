@@ -28,7 +28,12 @@ type User = {
 export function AuthProvider({ children }: any) {
   const router = useRouter()
 
-  const [ user, setUser ] = useState<User | null>(null)
+  const [ user, setUser ] = useState<User>({
+    name: '',
+    email: '',
+    businessId: '',
+    businessName: '',
+  })
 
   const isAuthenticated = !!user;
 

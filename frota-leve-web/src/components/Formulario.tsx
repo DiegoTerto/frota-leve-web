@@ -3,11 +3,10 @@
 import React, { Dispatch, SetStateAction, useState, useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { User } from './UserList';
-import api from '@/lib/axios-config';
+import { Employee } from '@/types/types';
 import { AuthContext } from '@/contexts/AuthContext';
 import { createEmployee } from '@/services/employee';
 
@@ -30,7 +29,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const Formulario = ({onSubmit, setState}:{onSubmit: (User: User) => void, setState: Dispatch<SetStateAction<boolean>>}) => {
+const Formulario = ({onSubmit, setState}:{onSubmit: (User: Employee) => void, setState: Dispatch<SetStateAction<boolean>>}) => {
   const [isEditMode, setIsEditMode] = useState(false); 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
