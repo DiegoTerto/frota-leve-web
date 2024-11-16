@@ -12,4 +12,5 @@ export interface Car {
   mileage: number;
   plate: string;
   brand: string;
+  qrCode?: string;
 }
