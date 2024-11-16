@@ -12,7 +12,6 @@ export type UptadeCarType = {
   mileage: number;
   name: string;
   brand: string;
-  plate:string
 }
 
 
@@ -28,12 +27,16 @@ export async function updateCar(carId:string, data: UptadeCarType) {
   return await api.put(`/api/car/${carId}`, data)
 }
 
-export async function getAll(): Promise<Car[]> {
+export async function getAll(page: number, size: number): Promise<any> {
   const { data } = await api.get('/api/car',{
     params:{
-      page:0,
-      size:10
+      page: page - 1,
+      size
     }
   });
-  return data.content
+  return data
+}
+
+export async function getByPlate(car: Car) {
+  return await api.get(`/api/car/${car.plate}`)
 }

@@ -38,7 +38,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Eye } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getAll } from "@/services/race";
 import api from "@/lib/axios-config";
@@ -65,13 +65,17 @@ export function Viagens() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
-  const [loading, setLoading] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(false);
+  const [isPageFirst, setIsPageFirst] = useState<boolean>(false);
+  const [isPageLast, setIsPageLast] = useState<boolean>(false);
 
   async function getAllRaces(page: number = currentPage) {
     setLoading(true)
     const { data }: any = await getAll(page, itemsPerPage);
     setRaces(data.content);
     setTotalPages(data.totalPages);
+    setIsPageFirst(data.first);
+    setIsPageLast(data.last);
     setLoading(false)
   }
 
@@ -240,7 +244,7 @@ export function Viagens() {
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
-                    <Button variant="outline" onClick={previousPage}>
+                    <Button disabled={isPageFirst} variant="outline" onClick={previousPage}>
                       <ChevronLeft />
                       Anterior
                     </Button>
@@ -281,7 +285,7 @@ export function Viagens() {
                     return null;
                   })}
                   <PaginationItem>
-                    <Button variant="outline" onClick={nextPage}>
+                    <Button disabled={isPageLast} variant="outline" onClick={nextPage}>
                       Proxima
                       <ChevronRight />
                     </Button>
@@ -361,14 +365,14 @@ export function Viagens() {
                 <div className="flex items-center gap-2">Sim</div>
                 <div className="font-semibold">KM final Evidência:</div>
                 <Button
-                  onClick={() =>
-                    downloadEvidence(selectedRace.photoEvidenceUrl)
-                  }
+                  disabled={!selectedRace.photoEvidenceUrl}
                   variant="link"
                   className="flex items-center justify-start"
                 >
-                  <Download />
-                  Baixar
+                  <Eye/>
+                  <a href={selectedRace.photoEvidenceUrl} target="_blank" rel="noopener noreferrer">
+                    Visualizar
+                  </a>
                 </Button>
               </div>
               <div className="space-y-2">

@@ -20,9 +20,9 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Car } from "@/types/types";
-import { AlertTriangleIcon, PenIcon, Trash2Icon } from "lucide-react";
+import { AlertTriangleIcon, Loader2, PenIcon, QrCode, Trash2Icon } from "lucide-react";
 import { useState } from "react";
-import { deleteCar, updateCar } from "@/services/car";
+import { deleteCar, getByPlate, updateCar } from "@/services/car";
 import { FormProvider, useForm } from "react-hook-form";
 import {
   FormControl,
@@ -35,6 +35,12 @@ import { Input } from "@/components/ui/input";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoadingTable } from "@/components/LoadingTable";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 interface DataTableProps {
   cars: Car[];
@@ -45,9 +51,6 @@ interface DataTableProps {
 const carUptadeFormSchema = z.object({
   brand: z.string().max(50, {
     message: "marca inválida",
-  }),
-  plate: z.string().max(7, {
-    message: "Placa inválida",
   }),
   name: z.string().max(50, {
     message: "Nome muito longo",
@@ -63,6 +66,9 @@ export function DataTable({ cars, onUpdateTable, loading }: DataTableProps) {
 
   const [carUpdated, setCarUpdated] = useState<Car | null>(null);
   const [openUpdateModal, setOpenUpdateModal] = useState<boolean>(false);
+
+  const [loadingDownloadQrCode, setLoadingDownloadQrCode] = useState<boolean>(false);
+  const [carDownloadQrCodeId, setCarDownloadQrCodeId] = useState<string>('');
 
   const carUpdateForm = useForm<CarUpdateFormValues>({
     resolver: zodResolver(carUptadeFormSchema),
@@ -84,7 +90,6 @@ export function DataTable({ cars, onUpdateTable, loading }: DataTableProps) {
     setCarUpdated(carUpdated);
     carUpdateForm.setValue(`name`, carUpdated.name);
     carUpdateForm.setValue(`brand`, carUpdated.brand);
-    carUpdateForm.setValue(`plate`, carUpdated.plate);
     carUpdateForm.setValue(`mileage`, carUpdated.mileage);
     setOpenUpdateModal(true);
   }
@@ -93,6 +98,30 @@ export function DataTable({ cars, onUpdateTable, loading }: DataTableProps) {
     await deleteCar(carDeleteId);
     setOpenDeleteModal(false);
     onUpdateTable();
+  }
+
+  function handleCloseUpdateModal(value: boolean) {
+    setOpenUpdateModal(value);
+  }
+
+  async function handleDownloadQrCode(car: Car) {
+    setCarDownloadQrCodeId(car.id)
+    setLoadingDownloadQrCode(true);
+    const { data } = await getByPlate(car);
+    const byteCharacters = atob(data.qrCode);
+    const byteNumbers = Array.from(byteCharacters, (char) => char.charCodeAt(0));
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: 'image/jpeg' });
+    const blobUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = `${car.name}-${car.plate}.jpg`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(blobUrl);
+    setLoadingDownloadQrCode(false);
   }
 
   return (
@@ -119,6 +148,26 @@ export function DataTable({ cars, onUpdateTable, loading }: DataTableProps) {
                 <TableCell>{car.mileage} </TableCell>
                 <TableCell>
                   <div className="gap-2 flex">
+                    <TooltipProvider delayDuration={200}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="bg-blue-300 hover:bg-blue-200"
+                            onClick={() => handleDownloadQrCode(car)}
+                          > 
+                            {loadingDownloadQrCode && carDownloadQrCodeId === car.id ? 
+                              	<Loader2 className="animate-spin" />
+                                : <QrCode className="h-4 w-4" />
+                            }
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Baixar QRCode</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                     <Button
                       variant="outline"
                       size="icon"
@@ -143,7 +192,7 @@ export function DataTable({ cars, onUpdateTable, loading }: DataTableProps) {
         </Table>
         <Dialog
           open={openDeleteModal}
-          onOpenChange={() => setOpenUpdateModal((value) => !value)}
+          onOpenChange={() => setOpenDeleteModal((value) => !value)}
         >
           <DialogContent>
             <DialogHeader>
@@ -176,7 +225,7 @@ export function DataTable({ cars, onUpdateTable, loading }: DataTableProps) {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-        <Dialog open={openUpdateModal}>
+        <Dialog open={openUpdateModal} onOpenChange={setOpenUpdateModal}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
@@ -202,19 +251,6 @@ export function DataTable({ cars, onUpdateTable, loading }: DataTableProps) {
                             placeholder="...(gol, astra, celta)"
                             {...field}
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={carUpdateForm.control}
-                    name="plate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Placa</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Digite a placa" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

@@ -22,6 +22,8 @@ const Employees = () => {
   const [totalPages, setTotalPages] = useState<number>(0);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
   const [loadingGetEmployees, setLoadingGetEmployess] = useState<boolean>(false);
+  const [isPageFirst, setIsPageFirst] = useState<boolean>(false);
+  const [isPageLast, setIsPageLast] = useState<boolean>(false);
 
   const [newEmployee, setNewEmployee] = useState<Employee>({
     id: '',
@@ -36,6 +38,8 @@ const Employees = () => {
     const { data } = await getAll(page, itemsPerPage);
     setEmployees(data.content);
     setTotalPages(data.totalPages);
+    setIsPageFirst(data.first);
+    setIsPageLast(data.last);
     setLoadingGetEmployess(false);
   }
 
@@ -90,7 +94,7 @@ const Employees = () => {
           <Pagination>
             <PaginationContent>
               <PaginationItem>
-                <Button variant="outline" onClick={previousPage}>
+                <Button disabled={isPageFirst} variant="outline" onClick={previousPage}>
                   <ChevronLeft />
                   Anterior
                 </Button>
@@ -131,7 +135,7 @@ const Employees = () => {
                 return null;
               })}
               <PaginationItem>
-                <Button variant="outline" onClick={nextPage}>
+                <Button disabled={isPageLast} variant="outline" onClick={nextPage}>
                   Proxima
                   <ChevronRight />
                 </Button>
