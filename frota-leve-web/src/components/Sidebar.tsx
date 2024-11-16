@@ -40,9 +40,9 @@ export default function SideBar() {
       <nav className="flex-1 space-y-1 p-4">
         <div className="space-y-1">
           {[
-            { name: "Corridas", href: "/", icon: Flag },
-            { name: "Veículos", href: "/cars", icon: Car },
-            { name: "Funcionários", href: "/employees", icon: Users },
+            { name: "Corridas", href: "/home", icon: Flag },
+            { name: "Veículos", href: "/home/cars", icon: Car },
+            { name: "Funcionários", href: "/home/employees", icon: Users },
           ].map((item) => {
             const isActive = pathname === item.href;
             return (
